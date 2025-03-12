@@ -1,0 +1,3 @@
+checkpoints/*
+logs/*
+code/__pycache__/*
