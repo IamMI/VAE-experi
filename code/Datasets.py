@@ -34,12 +34,24 @@ class ImageNetdatasets():
                                             transforms.ToTensor(),
         ]))
         
-        if Option=='train':
-            sample_radio = 0.01
-            dataset = Subset(dataset, range(int(len(dataset)*sample_radio)))
-        elif Option=='val':
-            sample_radio = 0.01
-            dataset = Subset(dataset, range(int(len(dataset)*sample_radio)))
+        # Subset of datasets
+        all_classes = dataset.classes  
+        class_to_idx = dataset.class_to_idx  
+        selected_classes = all_classes[:10] 
+        selected_class_indices = [class_to_idx[cls] for cls in selected_classes]
+        filtered_indices = [i for i, (_, label) in enumerate(dataset.samples) if label in selected_class_indices]
+        dataset = Subset(dataset, filtered_indices)
+        
+        # Update info
+        dataset.classes = selected_classes
+        dataset.class_to_idx = {cls: idx for idx, cls in enumerate(selected_classes)}
+        
+        # if Option=='train':
+        #     sample_radio = 0.01
+        #     dataset = Subset(dataset, range(int(len(dataset)*sample_radio)))
+        # elif Option=='val':
+        #     sample_radio = 0.01
+        #     dataset = Subset(dataset, range(int(len(dataset)*sample_radio)))
         
         return dataset 
         

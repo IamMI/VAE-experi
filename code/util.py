@@ -94,6 +94,12 @@ class VAE_MI:
         self.num_epoch = num_epoch
         print(f"Batch size: {self.batch_size}")
         print(f"Number of epochs: {self.num_epoch}")
+        
+        print("\n")
+        print("We use subset of ImageNet-1k to train our model!! Contained data follow:")
+        for key in self.train_dataset.classes:
+            print(f"Folder: {key}, label: {self.train_dataset.class_to_idx[key]}")
+        
         print('='*40)
         
     def train(self, rank, world_size):
@@ -112,8 +118,15 @@ class VAE_MI:
         if rank == 0:
             # Process 0 responds for eval and record
             eval_loader = torch.utils.data.DataLoader(self.eval_dataset, batch_size=self.batch_size, shuffle=False)
-            tb_writer = SummaryWriter(log_dir=os.path.join(current_work_dir, 'logs'))
-            
+            # Create results folder
+            t = time.localtime()
+            result_name = str(t.tm_mon) + '-' + str(t.tm_mday) + '-' + str(t.tm_hour) + '-' + str(t.tm_min)
+            folder = os.path.join(current_work_dir, 'results', result_name)
+            os.makedirs(folder, exist_ok=True)
+            os.makedirs(os.path.join(folder, 'checkpoints'), exist_ok=True)
+            os.makedirs(os.path.join(folder, 'logs'), exist_ok=True)
+            # Tensorboard
+            tb_writer = SummaryWriter(log_dir=os.path.join(folder, 'logs'))
             
         # DDP training
         device = torch.device("cuda", rank)
@@ -185,7 +198,7 @@ class VAE_MI:
                         'train_loss': avg_loss,
                         'eval_loss': avg_eval_loss,
                     }
-                    path = os.path.join(current_work_dir, "checkpoints", "CVAE-MI-{:03d}.pt".format(epoch))
+                    path = os.path.join(folder, "checkpoints", "CVAE-MI-{:03d}.pt".format(epoch))
                     torch.save(checkpoints, path)
             
             dist.barrier()
