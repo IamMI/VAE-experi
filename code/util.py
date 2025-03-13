@@ -42,7 +42,7 @@ def cleanup():
 
 class VAE_MI:
     def __init__(self, 
-                 index=148, noise_schedule="linear", diffusion_steps=1000):
+                 index=401, noise_schedule="linear", diffusion_steps=1000):
         """
         Initialize the VAE model
         :param index: Index of insert timestep
